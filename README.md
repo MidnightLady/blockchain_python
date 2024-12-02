@@ -1,3 +1,15 @@
-Solidity, Blockchain, and Smart Contract Course – Beginner to Expert Python Tutorial
+Blockchain A-Z: Build a Blockchain
 
 Basic blockchain with python + flask
+
+requirement:
+
+    $pip install -r requirement.txt
+
+
+Assuming, 3 boot nodes 
+
+    $export FLASK_APP=basic_flask.py
+    $flask run --host=127.0.0.1 --port=6001
+    $flask run --host=127.0.0.1 --port=6002
+    $flask run --host=127.0.0.1 --port=6003

@@ -1,17 +1,20 @@
 import datetime
 import hashlib
 import json
-from flask import Flask, jsonify
+from boot_nodes import boot_nodes
 
 
 class Blockchain:
     chain = None
-    difficulty = 1
+    current_difficulty = 1
     busy = False
+    boot_nodes = boot_nodes
+    transaction_pools = []
+
 
     def __init__(self, difficulty=1):
         self.chain = []
-        self.difficulty = difficulty
+        self.current_difficulty = difficulty
         self.__create_genesis_block()
 
     def __create_genesis_block(self):
@@ -20,11 +23,11 @@ class Blockchain:
 
     def _create_block(self, data, previous_hash):
         self.busy = True
-        hash_data = self._hash_function(data)
+        hash_tx = self._hash_function(data)
         header_block = {"index": len(self.chain),
                         "timestamp": str(datetime.datetime.now().timestamp()),
-                        "hash_data": hash_data,
-                        "difficulty": self.difficulty,
+                        "hash_tx": hash_tx,
+                        "difficulty": self.current_difficulty,
                         "nonce": 0,
                         "previous_hash": previous_hash, }
         header_block, _hash = self._mining(header_block)
@@ -32,18 +35,26 @@ class Blockchain:
         new_block = {
             "header": header_block,
             "block_hash": _hash,
-            "data": data,
+            "tx": data,
         }
         self.chain.append(new_block)
         self.busy = False
         return new_block
 
-    def add_block(self, data):
+    # assuming new difficulty every new block
+    def _calc_new_difficulty(self):
         last_block = self.chain[-1]
-        self._create_block(data, last_block["block_hash"])
+
+
+    def add_transaction(self, tx):
+        self.transaction_pools = tx
+        self.broadcast_new_transaction(tx)
+
+        # last_block = self.chain[-1]
+        # self._create_block(tx, last_block["block_hash"])
 
     def set_difficulty(self, difficulty):
-        self.difficulty = difficulty if difficulty >= 1 else 1
+        self.current_difficulty = difficulty if difficulty >= 1 else 1
 
     def get_target(self, difficulty):
         return "".zfill(difficulty)
@@ -71,8 +82,8 @@ class Blockchain:
             if previous_block and header["previous_hash"] != previous_block["block_hash"]:
                 return False
 
-            hash_data = self._hash_function(block["data"])
-            if hash_data != header["hash_data"]:
+            hash_tx = self._hash_function(block["tx"])
+            if hash_tx != header["hash_tx"]:
                 return False
 
             block_hash = self._hash_function(header)
@@ -88,7 +99,17 @@ class Blockchain:
         return self.chain[index] if len(self.chain) >= index else None
 
     def get_all_blocks(self):
-        blocks = []
-        for block in self.chain:
-            blocks.append(("block " + str(block["header"]["index"]) + " : " + block["block_hash"], block["data"]))
-        return blocks
+        return self.chain
+
+    # consensus blockchain network:
+    def connect_blockchain_network(self):
+        pass
+
+    def add_new_node(self):
+        pass
+
+    def broadcast_new_transaction(self, tx):
+        pass
+
+    def broadcast_new_block(self):
+        pass
